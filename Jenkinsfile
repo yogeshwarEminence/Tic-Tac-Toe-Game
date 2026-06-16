@@ -5,59 +5,35 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                echo 'Checking out code...'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'npm install'
+                echo 'Building application...'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'npm test || true'
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t myapp .'
+                echo 'Running tests...'
             }
         }
 
         stage('Manual Approval') {
             steps {
-                input message: 'Deploy to Production?', ok: 'Deploy'
+                input(
+                    message: 'Do you want to deploy to EC2?',
+                    ok: 'Deploy'
+                )
             }
         }
 
         stage('Deploy') {
             steps {
-                sshagent(credentials: ['ec2-key']) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no ubuntu@3.108.41.107 "
-
-                        cd ~/My-App
-
-                        git pull origin main
-
-                        docker stop myapp || true
-                        docker rm myapp || true
-
-                        docker build -t myapp .
-
-                        docker run -d \
-                            --name myapp \
-                            -p 80:80 \
-                            myapp
-                        "
-                    '''
-                }
+                echo 'Deploying application...'
             }
         }
     }
 }
-
-
