@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    parameters {
-        choice(name: 'ENV', choices: ['DEV', 'PROD'], description: 'Select Deployment Environment')
-    }
-
     environment {
         IMAGE_NAME = "my-node-app"
         DEPLOY_HOST = "ubuntu@65.0.31.245"
@@ -24,12 +20,26 @@ pipeline {
             }
         }
 
+        stage('Select Environment') {
+            steps {
+                script {
+                    env.ENV = input(
+                        message: 'Select Deployment Environment',
+                        ok: 'Deploy',
+                        parameters: [
+                            choice(name: 'ENV', choices: ['DEV', 'PROD'], description: 'Choose where to deploy')
+                        ]
+                    )
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 sshagent(['deployment-server']) {
                     script {
 
-                        if (params.ENV == 'DEV') {
+                        if (env.ENV == 'DEV') {
 
                             sh """
                             ssh -o StrictHostKeyChecking=no $DEPLOY_HOST '
