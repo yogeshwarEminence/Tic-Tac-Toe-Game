@@ -1,30 +1,29 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "my-node-app"
+        CONTAINER_NAME = "my-node-container"
+    }
+
     stages {
 
         stage('Checkout') {
             steps {
-                echo 'Checking out code...'
+                checkout scm
             }
         }
 
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Building application...'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Running tests...'
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
         stage('Manual Approval') {
             steps {
                 input(
-                    message: 'Do you want to deploy to EC2?',
+                    message: 'Deploy this application?',
                     ok: 'Deploy'
                 )
             }
@@ -32,9 +31,16 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo 'Deploying application...'
+                sh '''
+                docker stop $CONTAINER_NAME || true
+                docker rm $CONTAINER_NAME || true
+
+                docker run -d \
+                    --name $CONTAINER_NAME \
+                    -p 80:80 \
+                    $IMAGE_NAME
+                '''
             }
         }
     }
 }
-
