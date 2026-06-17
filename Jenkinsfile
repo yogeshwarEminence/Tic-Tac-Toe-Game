@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "my-node-app"
-        DEPLOY_HOST = "ubuntu@<DEPLOYMENT-EC2-IP>"
+        DEPLOY_HOST = "ubuntu@65.0.31.245"
     }
 
     stages {
