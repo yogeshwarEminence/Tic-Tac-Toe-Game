@@ -36,7 +36,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sshagent(['deployment-server']) {
+                sshagent(['ec2-ssh']) {
                     script {
 
                         if (env.ENV == 'DEV') {
